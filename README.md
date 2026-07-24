@@ -206,46 +206,6 @@ Then it creates a structured study schedule with balanced daily learning tasks.
 
 ---
 
-# 📸 Application Screenshots
-
-> Upload the following screenshots inside your GitHub repository.
-
-### 🏠 Home Page
-
-![Home](home.png)
-
----
-
-### 📊 Dashboard
-
-![Dashboard](dashboard.png)
-
----
-
-### 📅 AI Study Planner
-
-![Planner](planner.png)
-
----
-
-### 👤 Profile
-
-![Profile](profile.png)
-
----
-
-### ⚙️ Settings
-
-![Settings](settings.png)
-
----
-
-### 🌙 Dark Mode
-
-![Dark Mode](darkmode.png)
-
----
-
 # 📂 Project Structure
 
 ```text
@@ -479,7 +439,6 @@ This project helped strengthen practical skills in:
 **Muqaddas Khan**
 
 Dow University of Health Sciences
-
 Karachi, Pakistan
 
 ---
