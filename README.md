@@ -458,19 +458,6 @@ The application works successfully on desktop and mobile devices.
 
 ---
 
-# 🚀 Future Improvements
-
-Future versions of AI Study Planner may include:
-
-- AI Chat Tutor
-- PDF Study Plan Export
-- Calendar Integration
-- Push Notifications
-- Google Calendar Synchronization
-- Mobile Application (Android & iOS)
-
----
-
 # 📚 Learning Outcomes
 
 This project helped strengthen practical skills in:
@@ -494,10 +481,6 @@ This project helped strengthen practical skills in:
 Dow University of Health Sciences
 
 Karachi, Pakistan
-
-**Course:** AI Applications
-
-**Assignment:** Week 7 – Final Project (Ship Your AI App)
 
 ---
 
