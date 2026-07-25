@@ -1,37 +1,36 @@
-# 📚 AI Study Planner
+# 📚 Smart Study Planner AI
 
-> **An AI-Powered Personalized Study Planning Web Application**
+### An AI-Powered Personalized Study Planning Web Application
 
-![React](https://img.shields.io/badge/React-18-blue?logo=react)
+![React](https://img.shields.io/badge/React-19-blue?logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![Vite](https://img.shields.io/badge/Vite-Latest-purple?logo=vite)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-green?logo=supabase)
-![Bolt.new](https://img.shields.io/badge/Built%20with-Bolt.new-orange)
 ![GitHub](https://img.shields.io/badge/GitHub-Public%20Repository-black?logo=github)
+![Bolt.new](https://img.shields.io/badge/Built%20With-Bolt.new-orange)
 
 ---
 
 # 📖 Project Overview
 
-AI Study Planner is an AI-powered web application that helps students create personalized study schedules based on their subjects, exam dates, and available daily study hours.
+**Smart Study Planner AI** is an AI-powered web application designed to help students create personalized study schedules based on their subjects, exam dates, and available daily study hours.
 
-Instead of manually preparing study routines, students simply enter their study information and the application generates an organized study plan to improve productivity and exam preparation.
-
-The application provides a clean, responsive, and user-friendly interface that works across desktop, tablet, and mobile devices.
+Instead of manually planning study routines, students simply enter their study details, and the application generates a structured study plan that helps improve productivity, manage time efficiently, and prepare effectively for examinations.
 
 ---
 
 # 🎯 Problem Statement
 
-Students often face several challenges while preparing for examinations:
+Many students struggle with:
 
-- Difficulty managing multiple subjects.
-- No proper daily study schedule.
-- Poor time management.
-- Lack of organized study planning.
-- Difficulty tracking study progress.
+- Managing multiple subjects
+- Planning daily study routines
+- Preparing effectively for examinations
+- Maintaining consistency while studying
 
-AI Study Planner solves these problems by generating personalized AI-powered study plans, helping students organize their studies more effectively and stay consistent with their learning goals.
+Creating a realistic study schedule manually is often time-consuming and difficult.
+
+**Smart Study Planner AI** solves this real-world problem by generating personalized AI-powered study plans that help students stay organized, productive, and focused throughout their exam preparation.
 
 ---
 
@@ -61,98 +60,53 @@ https://github.com/muqaddaskhan1/smart-study-planner-ai
 
 # ✨ Features
 
-## 🤖 AI Study Planner
-
-Generate personalized study schedules based on:
-
-- Subject Name
-- Exam Date
-- Daily Study Hours
-
----
-
-## 🔐 User Authentication
-
-- Secure User Registration
-- Secure Login
-- Supabase Authentication
-- Persistent User Session
-
----
-
-## 📅 Personalized Study Planning
-
-Students can generate customized study schedules according to their learning requirements.
-
----
-
-## 📋 Daily Study Tasks
-
-The planner organizes daily study tasks to make exam preparation easier and more manageable.
-
----
-
-## 📊 Dashboard
-
-The dashboard provides an overview of:
-
-- Study Plans
-- Completed Tasks
-- Upcoming Exams
-- Study Progress
-
----
-
-## 📈 Progress Tracking
-
-Students can monitor their study progress through an interactive progress tracker.
-
----
-
-## 👤 User Profile
-
-Each user has a personal profile where account information can be managed.
-
----
-
-## ⚙️ Settings
-
-Application settings include:
-
-- Dark Mode
-- Reminder Time Settings
-- Notification Preferences
-
----
-
-## 🌙 Dark Mode
-
-Supports both Light Mode and Dark Mode for better accessibility.
-
----
-
-## 📱 Responsive Design
-
-The application works smoothly on:
-
-- Desktop
-- Laptop
-- Tablet
-- Mobile Devices
+- 🤖 AI-Powered Study Plan Generator
+- 🔐 Secure User Registration & Login
+- 📚 Subject-Based Study Planning
+- 📅 Exam Date Selection
+- ⏰ Daily Study Hours Planning
+- 📋 Personalized Study Schedule
+- 👤 User Profile
+- 🌙 Dark Mode Support
+- 📱 Responsive Design
+- ⚡ Fast Performance
+- 🔒 Secure Authentication using Supabase
 
 ---
 
 # 🤖 AI Feature
 
-AI Study Planner uses Artificial Intelligence to generate personalized study schedules based on each student's learning requirements.
+Smart Study Planner AI uses Artificial Intelligence to generate personalized study schedules based on each student's learning requirements.
 
 The AI analyzes:
 
 - Subject Name
 - Exam Date
-- Available Study Hours
+- Daily Available Study Hours
 
-Then it creates a structured study schedule with balanced daily learning tasks.
+Based on the provided information, the application generates a structured study schedule that divides learning into manageable daily tasks while encouraging effective time management and consistent study habits.
+
+---
+
+# 🧠 AI System Prompt
+
+```text
+You are an intelligent AI Study Planner.
+
+Generate a personalized study schedule based on the student's subject, available study hours, and exam date.
+
+Break large topics into manageable daily tasks.
+
+Maintain a balanced schedule.
+
+Include revision sessions before examinations.
+
+Avoid overloading the student.
+
+Provide motivational study tips.
+
+Return the study plan in a clean, structured, and easy-to-read format.
+```
 
 ---
 
@@ -163,140 +117,46 @@ Then it creates a structured study schedule with balanced daily learning tasks.
 - React.js
 - TypeScript
 - Vite
-- HTML5
-- CSS3
-
----
 
 ## Backend
 
 - Supabase
-
----
-
-## Authentication
-
 - Supabase Authentication
+- PostgreSQL Database
 
----
-
-## Database
-
-- Supabase Database
-
----
-
-## AI Development
+## AI & Development
 
 - Bolt.new
 - Prompt Engineering
-
----
 
 ## Version Control
 
 - Git
 - GitHub
 
----
-
 ## Deployment
 
-- Bolt Cloud Hosting
-
----
-
-# 📂 Project Structure
-
-```text
-AI-Study-Planner/
-│
-├── public/
-│
-├── src/
-│   ├── components/
-│   ├── hooks/
-│   ├── pages/
-│   ├── services/
-│   ├── supabase/
-│   ├── assets/
-│   ├── App.tsx
-│   ├── main.tsx
-│   └── index.css
-│
-├── package.json
-├── vite.config.ts
-├── tsconfig.json
-└── README.md
-```
-
----
-
-# ⚙️ Installation Guide
-
-Clone the repository
-
-```bash
-git clone https://github.com/muqaddaskhan1/smart-study-planner-ai.git
-```
-
-Move into the project folder
-
-```bash
-cd smart-study-planner-ai
-```
-
-Install dependencies
-
-```bash
-npm install
-```
-
-Run the application
-
-```bash
-npm run dev
-```
-
-Build the application
-
-```bash
-npm run build
-```
-
----
-
-# 🔑 Environment Variables
-
-Create a `.env` file and add your Supabase credentials.
-
-```env
-VITE_SUPABASE_URL=YOUR_SUPABASE_URL
-
-VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
-```
-
----
+- Bolt Hosting
 
 ---
 
 # 📸 Application Screenshots
 
-The following screenshots demonstrate the key features and functionality of the AI Study Planner application.
+The following screenshots demonstrate the key features and functionality of the Smart Study Planner AI application.
 
 ## 🏠 Dashboard
 
 ![Dashboard](dashboard.png)
 
-The dashboard provides an overview of study plans, completed tasks, upcoming exams, and overall study progress.
+The dashboard provides an overview of the application and allows users to access their study planner.
 
 ---
 
-## 📅 AI Study Planner
+## 📅 Study Planner
 
 ![Planner](planner.png)
 
-Students can generate personalized AI-powered study plans by entering the subject name, exam date, and available daily study hours.
+Students can generate personalized AI-powered study schedules by entering the subject name, exam date, and available daily study hours.
 
 ---
 
@@ -304,7 +164,7 @@ Students can generate personalized AI-powered study plans by entering the subjec
 
 ![Profile](profile.png)
 
-Each user has a personal profile where account information can be viewed and managed securely.
+Users can securely view and manage their personal profile information.
 
 ---
 
@@ -312,7 +172,7 @@ Each user has a personal profile where account information can be viewed and man
 
 ![Settings](settings.png)
 
-The settings page allows users to customize their experience, including dark mode preferences and account settings.
+The settings page allows users to customize their application preferences.
 
 ---
 
@@ -320,117 +180,110 @@ The settings page allows users to customize their experience, including dark mod
 
 ![Dark Mode](darkmode.png)
 
-The application supports both Light Mode and Dark Mode, providing a modern and comfortable user experience.
+The application supports both Light Mode and Dark Mode for a better user experience.
 
 ---
 
-# 🧠 AI System Prompt
-
-The AI Study Planner uses carefully designed prompt instructions to generate personalized study plans.
+# 📂 Project Structure
 
 ```text
-You are an intelligent AI Study Planner.
+src/
+├── components/
+├── hooks/
+├── pages/
+├── services/
+├── supabase/
+├── public/
+├── App.tsx
+├── main.tsx
+└── index.css
+```
+---
 
-Generate a personalized study plan based on the student's subject, exam date, and available study hours.
+# ⚙️ Installation Guide
 
-Break large topics into manageable daily tasks.
+### Prerequisites
 
-Maintain a balanced schedule.
+Before running the project locally, make sure the following tools are installed:
 
-Include revision sessions before exams.
+- Node.js (v18 or later)
+- npm (comes with Node.js)
+- Git
 
-Avoid overloading the student.
+---
 
-Encourage consistency and healthy study habits.
+### Clone the Repository
 
-Provide motivational study tips.
+```bash
+git clone https://github.com/muqaddaskhan1/smart-study-planner-ai.git
+```
 
-Return the study plan in a clean, structured, and easy-to-read format.
+Move into the project folder:
+
+```bash
+cd smart-study-planner-ai
 ```
 
 ---
 
-# 🤖 How the AI Works
+### Install Dependencies
 
-The AI follows a simple workflow:
-
-1. The student enters:
-   - Subject Name
-   - Exam Date
-   - Daily Study Hours
-
-2. The AI processes the provided information.
-
-3. A personalized study schedule is generated.
-
-4. The study plan is displayed in an organized format.
-
-5. Students can follow their daily tasks and monitor progress.
+```bash
+npm install
+```
 
 ---
 
-# 🌍 Real-World Impact
+### Environment Variables
 
-AI Study Planner helps students:
+Create a `.env` file in the project root and add your Supabase credentials:
 
-- Improve productivity.
-- Organize daily study routines.
-- Manage time effectively.
-- Prepare efficiently for examinations.
-- Stay motivated throughout their learning journey.
+```env
+VITE_SUPABASE_URL=your_supabase_project_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-This project demonstrates how Artificial Intelligence can solve a real educational problem using modern web technologies.
+> These values are available in your Supabase Dashboard under **Settings → API**.
+
+---
+
+### Run the Development Server
+
+```bash
+npm run dev
+```
+
+The application will start locally and can be accessed in your browser.
+
+---
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+---
+
+### Preview the Production Build
+
+```bash
+npm run preview
+```
 
 ---
 
 # 🔒 Security & Privacy
 
-The application prioritizes user privacy and data security.
+Smart Study Planner AI follows secure authentication and privacy practices.
 
 Security features include:
 
-- Secure user authentication with Supabase.
-- Protected user accounts.
-- Private study plans for every user.
-- Secure authentication sessions.
-- Passwords managed securely by Supabase Authentication.
-- No sensitive credentials stored in the public GitHub repository.
-
----
-
-# 🧪 Testing
-
-The application has been tested for:
-
-- User Registration
-- User Login
-- User Logout
-- Dashboard Navigation
-- AI Study Plan Generation
-- Personalized Study Planning
-- Progress Tracking
-- Profile Management
-- Settings
-- Dark Mode
-- Responsive Design
-
-The application works successfully on desktop and mobile devices.
-
----
-
-# 📚 Learning Outcomes
-
-This project helped strengthen practical skills in:
-
-- Artificial Intelligence Applications
-- Prompt Engineering
-- React.js
-- TypeScript
-- Supabase
-- Authentication Systems
-- Responsive Web Development
-- Git & GitHub
-- AI-assisted Development using Bolt.new
+- Secure user authentication using Supabase Authentication.
+- User passwords are securely managed by Supabase.
+- Each user's study data is associated only with their own account.
+- Sensitive credentials are stored using environment variables and are not included in the public GitHub repository.
+- Communication between the application and backend services is protected using HTTPS.
 
 ---
 
@@ -445,19 +298,21 @@ Karachi, Pakistan
 
 # 📄 License
 
-This project was developed for educational purposes as part of the Week 7 Final AI Project.
+This project was developed for educational purposes as part of the **Week 7 – Final Project (Ship Your AI App)**.
 
 ---
 
 # 🙏 Acknowledgements
 
+This project was built using modern web technologies and AI-assisted development tools.
+
 Special thanks to:
 
-- Bolt.new for AI-assisted application development.
-- Supabase for backend services and authentication.
-- React.js, TypeScript, and Vite for modern web development.
-- GitHub for version control and source code management.
+- **Bolt.new** for AI-assisted application development.
+- **Supabase** for backend services and secure authentication.
+- **React.js**, **TypeScript**, and **Vite** for modern web development.
+- **GitHub** for version control and project hosting.
 
 ---
 
-⭐ Thank you for reviewing this project.
+⭐ Thank you for reviewing **Smart Study Planner AI**.
