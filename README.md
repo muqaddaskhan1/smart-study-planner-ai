@@ -2,7 +2,7 @@
 
 [![Open in Bolt](https://bolt.new/static/open-in-bolt.svg)](https://bolt.new)
 
-> A complete student productivity application that generates personalized AI-powered study plans, tracks progress, and helps students prepare for exams efficiently.
+> A complete student productivity application that uses Google Gemini AI to generate personalized study plans, tracks progress, and helps students prepare for exams efficiently.
 
 **Live URL:** https://ai-study-planner-web-y3z7.bolt.host
 
@@ -44,14 +44,16 @@ University students often struggle with **time management** and **effective exam
 - Logout button in the navbar and settings
 - Each user's data is isolated and private
 
-### AI Study Plan Generator
-- Generates a personalized day-by-day study schedule from three inputs: subject name, exam date, and daily study hours
-- Supports 9 subjects with topic-specific templates: Mathematics, Biology, Biochemistry, English, Computer Science, Physics, Chemistry, History, and Economics
-- Falls back to a generic template for any unrecognized subject
+### AI Study Plan Generator (Powered by Google Gemini)
+- Uses the **Google Gemini 1.5 Flash** model to generate personalized day-by-day study schedules
+- Takes 6 inputs: subject name, exam date, daily study hours, weak subjects, preferred study time, and break preferences
+- Adapts topics and task difficulty to any subject — no hardcoded topic lists
+- Prioritizes weak subjects earlier in the schedule and allocates more time to them
+- Respects the student's preferred study time and break style when structuring tasks
 - Divides the plan into 5 progressive phases: Foundation, Practice, Deep Dive, Review, and Assessment
 - Automatically schedules rest days (Sundays) for plans longer than 10 days
 - Schedules full mock exams in the final 2 days for plans longer than 5 days
-- Adjusts the number of daily tasks based on available study hours (1–4 tasks per day)
+- Returns AI-generated study tips alongside the plan
 
 ### Study Progress Tracking
 - Progress is saved permanently to the database and survives page refreshes
@@ -61,12 +63,12 @@ University students often struggle with **time management** and **effective exam
 - "Today's Tasks" highlighted section for the current day
 - Missed days flagged automatically
 
-### AI Chat Assistant
+### AI Chat Assistant (Powered by Google Gemini)
 - Floating chat button available on every page
-- Students can ask study-related questions and receive instant, helpful answers
-- Covers topics: motivation, memorization, time management, procrastination, exam anxiety, focus, note-taking, sleep, and last-minute cramming
+- Uses the **Google Gemini 1.5 Flash** model with conversational history for real AI responses
+- Students can ask any study-related question and receive instant, personalized answers
 - Suggested question chips for quick starts
-- Chat history persists during the session
+- Chat history persists during the session for contextual follow-up questions
 
 ### Dashboard
 - Statistics cards: Total Plans, Completed Tasks, Upcoming Exams, and Study Streak
@@ -119,77 +121,60 @@ University students often struggle with **time management** and **effective exam
 
 ## AI Feature & System Prompt
 
-The application includes two AI-driven features:
+The application uses the **Google Gemini 1.5 Flash** model for both AI features. All Gemini API requests are handled by `src/services/gemini.ts`.
 
 ### 1. AI Study Plan Generator
 
-The study plan generator uses a **rule-based AI system** that matches the student's subject to a curated knowledge base of topics and task templates, then generates a phased daily schedule.
+The study plan generator sends a structured prompt to Gemini with the student's subject, exam date, daily study hours, weak subjects, preferred study time, and break preferences. The model returns a JSON-formatted day-by-day study plan that is parsed and saved to the database.
 
-**System Instructions (Logic):**
+**System Prompt:**
 
 ```
-Given the user's input (subject, exam date, daily study hours):
+You are an expert academic study planner. You create personalized,
+day-by-day study schedules for students preparing for exams.
 
-1. IDENTIFY the subject by matching keywords in the subject name:
-   - mathematics, biology, biochemistry, english, computer science,
-     physics, chemistry, history, economics
-   - If no match, use the GENERIC subject configuration.
+Rules:
+- Generate a task for EVERY day from today until the day before the exam.
+- Each task must have: day_number, task_date (YYYY-MM-DD), title,
+  description, topic, duration_minutes.
+- Spread the total daily study time across the tasks for each day.
+- Progress through phases: Foundation → Practice → Deep Dive →
+  Review → Assessment.
+- The last 2 days should be full mock exam practice.
+- If the plan is longer than 10 days, make Sundays rest days.
+- Adapt the topics to the specific subject.
+- If the student mentions weak subjects, prioritize those topics
+  earlier and allocate more time to them.
+- Respect the student's preferred study time and break preferences.
+- Provide 4 short study tips.
 
-2. CALCULATE total days until the exam date.
-
-3. DETERMINE tasks per day based on daily study hours:
-   - <= 1.5 hours → 1 task/day
-   - <= 3 hours  → 2 tasks/day
-   - <= 5 hours  → 3 tasks/day
-   - > 5 hours   → 4 tasks/day
-
-4. ASSIGN each day to a PHASE based on progress through the plan:
-   - 0–20%   → Foundation (learn theory, take notes)
-   - 20–45%  → Practice (solve problems, apply concepts)
-   - 45–70%  → Deep Dive (tackle challenging problems, analyze)
-   - 70–90%  → Review (active recall, review mistakes)
-   - 90–100% → Assessment (timed tests, self-evaluation)
-
-5. For each day, select the appropriate phase template and fill in
-   the next topic from the subject's topic list (cycling through all
-   topics before repeating).
-
-6. SPECIAL DAYS:
-   - Sundays: Rest & recharge day (for plans > 10 days)
-   - Last 2 days: Full mock exam (for plans > 5 days)
-   - Third-to-last day: Final mixed revision (for plans > 7 days)
-
-7. OUTPUT a list of tasks, each with: day number, date, title,
-   description, topic, and duration in minutes.
+Return ONLY valid JSON: { "tasks": [...], "tips": [...] }
 ```
 
 ### 2. AI Study Assistant (Chat)
 
-The chat assistant uses a **keyword-matching response system** to provide instant, short, and helpful answers to common study questions.
+The chat assistant uses Gemini's conversational history API so each response is contextually aware of the full conversation.
 
-**System Instructions (Logic):**
+**System Prompt:**
 
 ```
-You are an AI Study Assistant embedded in a study planning app.
-Your role is to give SHORT, HELPFUL answers to study-related questions.
+You are a friendly, knowledgeable AI Study Assistant embedded in a
+study planning app. Students ask you about study techniques,
+motivation, time management, procrastination, exam anxiety, focus,
+memorization, note-taking, and general academic advice.
 
-When a student asks a question:
-1. MATCH the question against known topics using keyword patterns:
-   - motivation / lazy / unmotivated → motivation tips
-   - memory / remember / recall / flashcard → memorization techniques
-   - time management / schedule / productive → time management tips
-   - procrastination / delay / put off → anti-procrastination strategies
-   - anxiety / stress / nervous / panic → exam anxiety management
-   - short time / last minute / cram → last-minute study tips
-   - focus / concentration / distract → focus improvement tips
-   - notes / summarize → note-taking techniques
-   - sleep / rest / tired → sleep and study tips
-2. If no keyword matches, return GENERAL study tips covering
-   active recall, focused blocks, teaching, consistency, and wellness.
-3. Keep each answer to 5 concise numbered tips.
-4. Maintain a friendly, encouraging tone.
-5. Preserve chat history during the session.
+Guidelines:
+- Keep answers concise, practical, and encouraging.
+- Use short numbered lists (3-5 items) when giving tips.
+- Do not mention that you are an AI or a language model.
+- If a question is not study-related, gently redirect to study topics.
 ```
+
+### API Key Handling
+
+- The Gemini API key is read from the `VITE_GEMINI_API_KEY` environment variable.
+- If the key is missing, the app shows a friendly warning banner on the planner and an error message in the chat — it never crashes.
+- The key is stored in `.env` which is gitignored and never committed to the repository.
 
 ---
 
@@ -201,6 +186,7 @@ When a student asks a question:
 | **TypeScript** | Type-safe JavaScript for robust, maintainable code |
 | **Vite** | Fast build tool and development server |
 | **Supabase** | Backend-as-a-Service: authentication, PostgreSQL database, row-level security, and data persistence |
+| **Google Gemini API** | Generative AI model (Gemini 1.5 Flash) for study plan generation and the chat assistant |
 | **Tailwind CSS** | Utility-first CSS framework for responsive, consistent styling |
 | **Lucide React** | Icon library for clean, modern UI icons |
 | **Bolt.new** | AI-powered development platform used to build and deploy the application |
@@ -284,9 +270,11 @@ When a student asks a question:
    ```env
    VITE_SUPABASE_URL=your_supabase_project_url
    VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+   VITE_GEMINI_API_KEY=your_google_gemini_api_key
    ```
 
-   > These values can be found in your Supabase project dashboard under **Settings > API**.
+   > - Supabase values: found in your Supabase project dashboard under **Settings > API**.
+   > - Gemini API key: get one from the [Google AI Studio](https://aistudio.google.com/app/apikey) dashboard.
 
 4. **Start the development server**
 
@@ -343,9 +331,10 @@ ai-study-planner/
 │   │   ├── notifications.ts    # Browser notification helpers
 │   │   ├── pdfExport.ts         # PDF export utility
 │   │   ├── quotes.ts            # Motivational quotes data
-│   │   ├── studyPlanner.ts      # AI study plan generation engine
 │   │   ├── supabase.ts          # Supabase client and shared types
 │   │   └── useTheme.ts          # Dark/light theme hook
+│   ├── services/               # External API integrations
+│   │   └── gemini.ts            # Google Gemini API client (plan + chat)
 │   ├── pages/                  # Application pages
 │   │   ├── About.tsx            # About page
 │   │   ├── Assistant.tsx        # AI assistant page with tips
@@ -394,5 +383,6 @@ This project is submitted as part of a university final project. All rights rese
 
 - Built with [Bolt.new](https://bolt.new) — AI-powered web development platform
 - Backend powered by [Supabase](https://supabase.com)
+- AI powered by [Google Gemini](https://ai.google.dev/) — Gemini 1.5 Flash model
 - Icons by [Lucide](https://lucide.dev)
 - Deployed on Bolt.host

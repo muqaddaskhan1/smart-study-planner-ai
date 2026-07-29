@@ -1,13 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Calendar, Clock, BookOpen, Sparkles, Loader2, CheckCircle2, Circle, Trash2, CalendarDays, TrendingUp, RotateCcw, Quote, Lightbulb, ChevronDown, ChevronRight, Archive, Download, FileText } from 'lucide-react';
+import { Calendar, Clock, BookOpen, Sparkles, Loader2, CheckCircle2, Circle, Trash2, CalendarDays, TrendingUp, RotateCcw, Quote, Lightbulb, ChevronDown, ChevronRight, Archive, Download, FileText, AlertCircle, Target, Coffee, Sunrise } from 'lucide-react';
 import { supabase, type StudyPlan, type StudyTask } from '@/lib/supabase';
-import { generateStudyPlan, getPhaseLabel } from '@/lib/studyPlanner';
-import { getRandomQuote, getRandomTips } from '@/lib/quotes';
+import { generateAIStudyPlan, isGeminiConfigured } from '@/services/gemini';
+import { getRandomQuote } from '@/lib/quotes';
 import { exportPlanToPDF } from '@/lib/pdfExport';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/components/Toast';
 import ProgressRing from '@/components/ProgressRing';
 import EmptyState from '@/components/EmptyState';
+
+function getPhaseLabel(dayNumber: number, totalDays: number): string {
+  const progress = totalDays > 1 ? (dayNumber - 1) / totalDays : 0.5;
+  if (progress < 0.2) return 'Foundation';
+  if (progress < 0.45) return 'Practice';
+  if (progress < 0.7) return 'Deep Dive';
+  if (progress < 0.9) return 'Review';
+  return 'Assessment';
+}
 
 export default function Planner() {
   const { user } = useAuth();
@@ -15,8 +24,12 @@ export default function Planner() {
   const [subject, setSubject] = useState('');
   const [examDate, setExamDate] = useState('');
   const [dailyHours, setDailyHours] = useState('2');
+  const [weakSubjects, setWeakSubjects] = useState('');
+  const [preferredStudyTime, setPreferredStudyTime] = useState('Morning');
+  const [breakPreference, setBreakPreference] = useState('Short frequent breaks (Pomodoro)');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const geminiReady = isGeminiConfigured();
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [tasks, setTasks] = useState<StudyTask[]>([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -47,7 +60,7 @@ export default function Planner() {
       setTasks((planTasks as StudyTask[]) || []);
       setOldPlans(allPlans.slice(1));
       setQuote(getRandomQuote());
-      setTips(getRandomTips(4));
+      setTips([]);
     } else {
       setPlan(null);
       setTasks([]);
@@ -82,7 +95,15 @@ export default function Planner() {
 
       const { data: newPlan, error: planError } = await supabase
         .from('study_plans')
-        .insert({ subject: subject.trim(), exam_date: examDate, daily_hours: hours, total_days: totalDays })
+        .insert({
+          subject: subject.trim(),
+          exam_date: examDate,
+          daily_hours: hours,
+          total_days: totalDays,
+          weak_subjects: weakSubjects.trim(),
+          preferred_study_time: preferredStudyTime,
+          break_preference: breakPreference,
+        })
         .select()
         .single();
 
@@ -92,8 +113,16 @@ export default function Planner() {
         return;
       }
 
-      const generatedTasks = generateStudyPlan({ subject: subject.trim(), examDate, dailyHours: hours });
-      const tasksToInsert = generatedTasks.map((t) => ({
+      const aiResult = await generateAIStudyPlan({
+        subject: subject.trim(),
+        examDate,
+        dailyHours: hours,
+        weakSubjects: weakSubjects.trim(),
+        preferredStudyTime,
+        breakPreference,
+      });
+
+      const tasksToInsert = aiResult.tasks.map((t) => ({
         plan_id: (newPlan as StudyPlan).id,
         day_number: t.day_number,
         task_date: t.task_date,
@@ -113,15 +142,17 @@ export default function Planner() {
       setPlan(newPlan as StudyPlan);
       setTasks((insertedTasks as StudyTask[]) || []);
       setQuote(getRandomQuote());
-      setTips(getRandomTips(4));
+      setTips(aiResult.tips.length > 0 ? aiResult.tips : []);
       setExpandedDays(new Set());
       setSubject('');
       setExamDate('');
       setDailyHours('2');
+      setWeakSubjects('');
       await loadExistingPlan();
-      show('Study plan generated successfully!', 'success');
-    } catch {
-      setError('Something went wrong. Please try again.');
+      show('AI study plan generated successfully!', 'success');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+      setError(msg);
     }
     setLoading(false);
   };
@@ -227,39 +258,90 @@ export default function Planner() {
           <p className="text-slate-500 dark:text-slate-400">Enter your details and let AI build a personalized study schedule for you.</p>
         </div>
 
+        {/* API Key Warning */}
+        {!geminiReady && (
+          <div className="mb-6 flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 animate-fade-in-up">
+            <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-medium text-amber-800 dark:text-amber-400">AI features are unavailable</p>
+              <p className="text-sm text-amber-700 dark:text-amber-500 mt-0.5">
+                The Google Gemini API key is not configured. Add <code className="px-1.5 py-0.5 rounded bg-amber-100 dark:bg-amber-900/50 text-xs">VITE_GEMINI_API_KEY</code> to your environment to enable AI-powered study plan generation.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Form */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 md:p-8 mb-8 animate-fade-in-up">
-          <form onSubmit={handleGenerate} className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <div>
-              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <BookOpen className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Subject Name
-              </label>
-              <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Mathematics"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
+          <form onSubmit={handleGenerate} className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <BookOpen className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Subject Name
+                </label>
+                <input type="text" value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="e.g. Mathematics"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <Calendar className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Exam Date
+                </label>
+                <input type="date" value={examDate} min={todayStr} onChange={(e) => setExamDate(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Study Hours / Day
+                </label>
+                <input type="number" value={dailyHours} min="1" max="16" step="0.5" onChange={(e) => setDailyHours(e.target.value)} placeholder="e.g. 3"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
+              </div>
             </div>
-            <div>
-              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <Calendar className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Exam Date
-              </label>
-              <input type="date" value={examDate} min={todayStr} onChange={(e) => setExamDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <Target className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Weak Subjects
+                </label>
+                <input type="text" value={weakSubjects} onChange={(e) => setWeakSubjects(e.target.value)} placeholder="e.g. Calculus, Organic Chem"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <Sunrise className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Preferred Study Time
+                </label>
+                <select value={preferredStudyTime} onChange={(e) => setPreferredStudyTime(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200">
+                  <option value="Morning">Morning</option>
+                  <option value="Afternoon">Afternoon</option>
+                  <option value="Evening">Evening</option>
+                  <option value="Night">Night</option>
+                  <option value="Mixed">Mixed / Flexible</option>
+                </select>
+              </div>
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                  <Coffee className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Break Preference
+                </label>
+                <select value={breakPreference} onChange={(e) => setBreakPreference(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200">
+                  <option value="Short frequent breaks (Pomodoro)">Short frequent breaks (Pomodoro)</option>
+                  <option value="Longer breaks between sessions">Longer breaks between sessions</option>
+                  <option value="Few short breaks">Few short breaks</option>
+                  <option value="No preference">No preference</option>
+                </select>
+              </div>
             </div>
-            <div>
-              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                <Clock className="w-4 h-4 text-blue-500 dark:text-blue-400" /> Study Hours / Day
-              </label>
-              <input type="number" value={dailyHours} min="1" max="16" step="0.5" onChange={(e) => setDailyHours(e.target.value)} placeholder="e.g. 3"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 outline-none transition-all text-slate-700 dark:text-slate-200" />
-            </div>
+
             {error && (
-              <div className="md:col-span-3">
+              <div>
                 <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 px-4 py-2.5 rounded-lg">{error}</p>
               </div>
             )}
-            <div className="md:col-span-3">
-              <button type="submit" disabled={loading}
+            <div>
+              <button type="submit" disabled={loading || !geminiReady}
                 className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold shadow-md shadow-blue-200 dark:shadow-blue-900 hover:shadow-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-60 transition-all duration-200">
-                {loading ? (<><Loader2 className="w-5 h-5 animate-spin" /> Generating Plan...</>) : (<><Sparkles className="w-5 h-5" /> Generate AI Study Plan</>)}
+                {loading ? (<><Loader2 className="w-5 h-5 animate-spin" /> AI is generating your plan...</>) : (<><Sparkles className="w-5 h-5" /> Generate AI Study Plan</>)}
               </button>
             </div>
           </form>

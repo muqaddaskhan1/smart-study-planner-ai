@@ -1,43 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Brain, Send, Loader2, X, MessageCircle } from 'lucide-react';
+import { Brain, Send, Loader2, X, MessageCircle, AlertCircle } from 'lucide-react';
+import { generateAIChatResponse, isGeminiConfigured } from '@/services/gemini';
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
 };
-
-function generateResponse(question: string): string {
-  const q = question.toLowerCase();
-
-  if (q.match(/motivat|lazy|unmotivated|give up/)) {
-    return 'Staying motivated is hard! Try these:\n\n1. Set small daily goals — completing them builds momentum.\n2. Use the "5-minute rule": just commit to 5 minutes.\n3. Reward yourself after each session.\n4. Visualize your success — imagine acing that exam.\n5. Track your progress visually.';
-  }
-  if (q.match(/memori|remember|retain|flashcard|recall/)) {
-    return 'For memorization:\n\n1. Active Recall: test yourself instead of re-reading.\n2. Spaced Repetition: review at increasing intervals.\n3. Mnemonics: use acronyms and visual associations.\n4. Feynman Technique: explain it simply.\n5. Sleep after studying — it consolidates memory.';
-  }
-  if (q.match(/time manage|schedule|productiv|organize/)) {
-    return 'Time management tips:\n\n1. Pomodoro Technique: 25 min focus, 5 min break.\n2. Tackle hardest subjects when energy is highest.\n3. Time-block your day.\n4. Use the 2-minute rule for quick tasks.\n5. Plan your week on Sunday.';
-  }
-  if (q.match(/procrastinat|delay|put off|cant start/)) {
-    return 'Beating procrastination:\n\n1. Break tasks into tiny steps.\n2. Remove friction — put your phone away.\n3. Pair studying with something you enjoy.\n4. Forgive past procrastination.\n5. Action creates motivation — just start!';
-  }
-  if (q.match(/anxiety|stress|nervous|panic|worried|fear/)) {
-    return 'Exam anxiety is manageable:\n\n1. Prepare thoroughly — confidence beats fear.\n2. Practice under exam conditions.\n3. Try breathing: 4s in, 7s hold, 8s out.\n4. Reframe anxiety as excitement.\n5. Get enough sleep before the exam.';
-  }
-  if (q.match(/short time|last minute|quick|soon|fast|cram/)) {
-    return 'Studying with limited time:\n\n1. Prioritize the most important topics.\n2. Use the 80/20 rule — focus on high-yield material.\n3. Active recall over passive reading.\n4. Make one-page summary sheets.\n5. Do past papers — most effective last-minute strategy.';
-  }
-  if (q.match(/focus|concentrat|distract|attention/)) {
-    return 'Improving focus:\n\n1. Put your phone in another room.\n2. Study in a dedicated space.\n3. Use noise-canceling headphones or white noise.\n4. Try the Pomodoro Technique.\n5. Single-task — multitasking cuts efficiency by 40%.';
-  }
-  if (q.match(/note|take notes|summar/)) {
-    return 'Effective note-taking:\n\n1. Cornell Method: notes, cues, and summary sections.\n2. Write in your own words.\n3. Use diagrams and mind maps.\n4. Review within 24 hours.\n5. Color-code by theme.';
-  }
-  if (q.match(/sleep|rest|tired|exhausted/)) {
-    return 'Sleep and studying:\n\n1. Sleep consolidates learning — never skip it.\n2. Aim for 7-9 hours.\n3. Avoid screens 1 hour before bed.\n4. Study hardest material before sleep.\n5. Keep a consistent sleep schedule.';
-  }
-  return 'Great question! Here are some general tips:\n\n1. Use active recall over passive reading.\n2. Break sessions into focused blocks with breaks.\n3. Teach what you learn to someone else.\n4. Stay consistent — daily study beats cramming.\n5. Take care of sleep, exercise, and nutrition.\n\nAsk me about memorization, time management, motivation, or exam anxiety!';
-}
 
 const suggestedQuestions = [
   'How do I stay motivated?',
@@ -55,22 +23,40 @@ export default function ChatWidget() {
   const [loading, setLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const [chatError, setChatError] = useState('');
+  const geminiReady = isGeminiConfigured();
+
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages, loading]);
 
-  const handleSend = (text?: string) => {
+  const handleSend = async (text?: string) => {
     const content = (text ?? input).trim();
     if (!content || loading) return;
-    setMessages((prev) => [...prev, { role: 'user', content }]);
+
+    if (!geminiReady) {
+      setChatError('AI chat is unavailable. The Gemini API key is not configured.');
+      return;
+    }
+
+    const userMessage: Message = { role: 'user', content };
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     setInput('');
+    setChatError('');
     setLoading(true);
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'assistant', content: generateResponse(content) }]);
-      setLoading(false);
-    }, 500 + Math.random() * 300);
+
+    try {
+      const response = await generateAIChatResponse(messages, content);
+      setMessages((prev) => [...prev, { role: 'assistant', content: response }]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : 'Failed to get a response. Please try again.';
+      setChatError(msg);
+      setMessages((prev) => [...prev, { role: 'assistant', content: 'Sorry, I could not process that request. Please try again.' }]);
+    }
+    setLoading(false);
   };
 
   return (
@@ -143,6 +129,12 @@ export default function ChatWidget() {
 
           {/* Input */}
           <div className="border-t border-slate-100 dark:border-slate-800 p-3">
+            {chatError && (
+              <div className="mb-2 flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800">
+                <AlertCircle className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-amber-700 dark:text-amber-400">{chatError}</p>
+              </div>
+            )}
             <div className="flex gap-2">
               <input
                 type="text"

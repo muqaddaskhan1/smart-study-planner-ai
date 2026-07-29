@@ -18,6 +18,9 @@ export type StudyPlan = {
   exam_date: string;
   daily_hours: number;
   total_days: number;
+  weak_subjects: string | null;
+  preferred_study_time: string | null;
+  break_preference: string | null;
   created_at: string;
 };
 
